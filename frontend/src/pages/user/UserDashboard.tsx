@@ -12,7 +12,7 @@ const UserDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -82,7 +82,7 @@ const UserDashboard: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">
+                  <div className="text-2xl font-bold text-primary">
                     Aktif
                   </div>
                   <p className="text-sm text-gray-500 mt-1">
@@ -108,7 +108,7 @@ const UserDashboard: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">
+                  <div className="text-2xl font-bold text-green-600">
                     Rp 0
                   </div>
                   <p className="text-sm text-gray-500 mt-1">

@@ -12,6 +12,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Upload, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import Header from '@/components/Header';
+import goodTeamIllustration from '@/assets/team checklist-amico.svg';
 
 const registerSchema = z.object({
   nim: z.string().min(1, 'NIM wajib diisi'),
@@ -53,6 +55,7 @@ const Register: React.FC = () => {
     berkas: null,
     foto: null,
   });
+  const [fotoPreview, setFotoPreview] = useState<string | null>(null);
 
   const {
     register,
@@ -66,6 +69,10 @@ const Register: React.FC = () => {
 
   const handleFileChange = (field: 'ktm' | 'berkas' | 'foto', file: File | null) => {
     setFiles(prev => ({ ...prev, [field]: file }));
+    if (field === 'foto') {
+      if (fotoPreview) URL.revokeObjectURL(fotoPreview);
+      setFotoPreview(file ? URL.createObjectURL(file) : null);
+    }
   };
 
   const onSubmit = async (data: RegisterFormData) => {
@@ -112,260 +119,275 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Daftar Akun
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Bergabung dengan Koperasi Mahasiswa UIN SGD Bandung
-          </p>
+    <div className="min-h-screen bg-background pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+      <Header />
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+        {/* Kiri: Form pendaftaran */}
+        <div>
+          <div className="mb-3">
+            <h2 className="text-2xl font-bold text-gray-900">Daftar Akun</h2>
+            <p className="mt-1 text-xs text-gray-600">Bergabung dengan Koperasi Mahasiswa UIN SGD Bandung</p>
+          </div>
+
+          <Card className="shadow-sm">
+            <CardContent className="pt-2">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-2 [&_input]:h-8 [&_input]:py-1 [&_input]:text-sm [&_input]:bg-white [&_input::placeholder]:text-xs">
+                {/* NIM */}
+                <div>
+                  <Label htmlFor="nim">NIM</Label>
+                  <Input
+                    id="nim"
+                    type="text"
+                    {...register('nim')}
+                    className={errors.nim ? 'border-red-500' : ''}
+                  />
+                  {errors.nim && (
+                    <p className="mt-1 text-sm text-red-600">{errors.nim.message}</p>
+                  )}
+                </div>
+
+                {/* Nama */}
+                <div>
+                  <Label htmlFor="nama">Nama Lengkap</Label>
+                  <Input
+        id="nama"
+        type="text"
+        placeholder="Nama lengkap"
+        className={`${errors.nama ? 'border-red-500' : ''} placeholder:text-xs`}
+      />
+                  {errors.nama && (
+                    <p className="mt-1 text-sm text-red-600">{errors.nama.message}</p>
+                  )}
+                </div>
+
+                {/* Email */}
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Email"
+                    className={`${errors.email ? 'border-red-500' : ''} placeholder:text-xs bg-white`}
+                  />
+                  {errors.email && (
+                    <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                  )}
+                </div>
+
+                {/* Password */}
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    {...register('password')}
+                    className={errors.password ? 'border-red-500' : ''}
+                  />
+                  {errors.password && (
+                    <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+                  )}
+                </div>
+
+                {/* Confirm Password */}
+                <div>
+                  <Label htmlFor="confirmPassword">Konfirmasi Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    {...register('confirmPassword')}
+                    className={errors.confirmPassword ? 'border-red-500' : ''}
+                  />
+                  {errors.confirmPassword && (
+                    <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
+                  )}
+                </div>
+
+                {/* Fakultas */}
+                <div>
+                  <Label htmlFor="fakultas">Fakultas</Label>
+                  <Select onValueChange={(value) => setValue('fakultas', value)}>
+                    <SelectTrigger className={`${errors.fakultas ? 'border-red-500' : ''} h-8 text-sm`}>
+                      <SelectValue placeholder="Pilih fakultas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {fakultasOptions.map((fakultas) => (
+                        <SelectItem key={fakultas} value={fakultas}>
+                          {fakultas}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.fakultas && (
+                    <p className="mt-1 text-sm text-red-600">{errors.fakultas.message}</p>
+                  )}
+                </div>
+
+                {/* Jurusan */}
+                <div>
+                  <Label htmlFor="jurusan">Jurusan</Label>
+                  <Input
+                    id="jurusan"
+                    type="text"
+                    {...register('jurusan')}
+                    className={errors.jurusan ? 'border-red-500' : ''}
+                  />
+                  {errors.jurusan && (
+                    <p className="mt-1 text-sm text-red-600">{errors.jurusan.message}</p>
+                  )}
+                </div>
+
+                {/* File Uploads */}
+                <div className="space-y-3">
+                  <h3 className="text-base font-medium">Upload Dokumen</h3>
+                  
+                  {/* KTM */}
+                  <div>
+                    <Label htmlFor="ktm">Kartu Tanda Mahasiswa (KTM)</Label>
+                    <div className="mt-1 flex justify-center px-3 py-3 border-2 border-gray-300 border-dashed rounded-md">
+                      <div className="space-y-1 text-center">
+                        <Upload className="mx-auto h-6 w-6 text-gray-400" />
+                        <div className="flex text-xs text-gray-600">
+                          <label
+                            htmlFor="ktm"
+                            className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
+                          >
+                            <span>Upload file</span>
+                            <input
+                              id="ktm"
+                              name="ktm"
+                              type="file"
+                              className="sr-only"
+                              accept="image/*"
+                              onChange={(e) => handleFileChange('ktm', e.target.files?.[0] || null)}
+                            />
+                          </label>
+                        </div>
+                        <p className="text-xs text-gray-500">PNG, JPG, JPEG</p>
+                      </div>
+                    </div>
+                    {files.ktm && (
+                      <div className="mt-2 flex items-center text-sm text-green-600">
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        {files.ktm.name}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Berkas Pendukung */}
+                  <div>
+                    <Label htmlFor="berkas">Berkas Pendukung</Label>
+                    <div className="mt-1 flex justify-center px-3 py-3 border-2 border-gray-300 border-dashed rounded-md">
+                      <div className="space-y-1 text-center">
+                        <Upload className="mx-auto h-6 w-6 text-gray-400" />
+                        <div className="flex text-xs text-gray-600">
+                          <label
+                            htmlFor="berkas"
+                            className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
+                          >
+                            <span>Upload file</span>
+                            <input
+                              id="berkas"
+                              name="berkas"
+                              type="file"
+                              className="sr-only"
+                              accept="image/*"
+                              onChange={(e) => handleFileChange('berkas', e.target.files?.[0] || null)}
+                            />
+                          </label>
+                        </div>
+                        <p className="text-xs text-gray-500">PNG, JPG, JPEG</p>
+                      </div>
+                    </div>
+                    {files.berkas && (
+                      <div className="mt-2 flex items-center text-sm text-green-600">
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        {files.berkas.name}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Foto Profil */}
+                  <div>
+                    <Label htmlFor="foto">Foto Profil</Label>
+                    <div className="mt-1 flex justify-center px-3 py-3 border-2 border-gray-300 border-dashed rounded-md">
+                      <div className="space-y-1 text-center">
+                        <Upload className="mx-auto h-6 w-6 text-gray-400" />
+                        <div className="flex text-xs text-gray-600">
+                          <label
+                            htmlFor="foto"
+                            className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
+                          >
+                            <span>Upload file</span>
+                            <input
+                              id="foto"
+                              name="foto"
+                              type="file"
+                              className="sr-only"
+                              accept="image/*"
+                              onChange={(e) => handleFileChange('foto', e.target.files?.[0] || null)}
+                            />
+                          </label>
+                        </div>
+                        <p className="text-xs text-gray-500">PNG, JPG, JPEG</p>
+                      </div>
+                    </div>
+                    {fotoPreview && (
+                      <div className="mt-3 flex items-center gap-3">
+                        <img src={fotoPreview} alt="Preview foto" className="h-12 w-12 rounded-md object-cover border" />
+                        {files.foto && (
+                          <div className="flex items-center text-sm text-green-600">
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            {files.foto.name}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="w-full h-9 text-sm"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Mendaftar...
+                    </>
+                  ) : (
+                    'Daftar'
+                  )}
+                </Button>
+              </form>
+
+              <div className="mt-6 text-center">
+                <p className="text-sm text-gray-600">
+                  Sudah punya akun?{' '}
+                  <Link to="/login" className="font-medium text-primary hover:underline">
+                    Masuk di sini
+                  </Link>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Form Pendaftaran</CardTitle>
-            <CardDescription>
-              Lengkapi data diri Anda untuk mendaftar
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {/* NIM */}
-              <div>
-                <Label htmlFor="nim">NIM</Label>
-                <Input
-                  id="nim"
-                  type="text"
-                  {...register('nim')}
-                  className={errors.nim ? 'border-red-500' : ''}
-                />
-                {errors.nim && (
-                  <p className="mt-1 text-sm text-red-600">{errors.nim.message}</p>
-                )}
-              </div>
-
-              {/* Nama */}
-              <div>
-                <Label htmlFor="nama">Nama Lengkap</Label>
-                <Input
-                  id="nama"
-                  type="text"
-                  {...register('nama')}
-                  className={errors.nama ? 'border-red-500' : ''}
-                />
-                {errors.nama && (
-                  <p className="mt-1 text-sm text-red-600">{errors.nama.message}</p>
-                )}
-              </div>
-
-              {/* Email */}
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  {...register('email')}
-                  className={errors.email ? 'border-red-500' : ''}
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-                )}
-              </div>
-
-              {/* Password */}
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  {...register('password')}
-                  className={errors.password ? 'border-red-500' : ''}
-                />
-                {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
-                )}
-              </div>
-
-              {/* Confirm Password */}
-              <div>
-                <Label htmlFor="confirmPassword">Konfirmasi Password</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  {...register('confirmPassword')}
-                  className={errors.confirmPassword ? 'border-red-500' : ''}
-                />
-                {errors.confirmPassword && (
-                  <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
-                )}
-              </div>
-
-              {/* Fakultas */}
-              <div>
-                <Label htmlFor="fakultas">Fakultas</Label>
-                <Select onValueChange={(value) => setValue('fakultas', value)}>
-                  <SelectTrigger className={errors.fakultas ? 'border-red-500' : ''}>
-                    <SelectValue placeholder="Pilih fakultas" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {fakultasOptions.map((fakultas) => (
-                      <SelectItem key={fakultas} value={fakultas}>
-                        {fakultas}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.fakultas && (
-                  <p className="mt-1 text-sm text-red-600">{errors.fakultas.message}</p>
-                )}
-              </div>
-
-              {/* Jurusan */}
-              <div>
-                <Label htmlFor="jurusan">Jurusan</Label>
-                <Input
-                  id="jurusan"
-                  type="text"
-                  {...register('jurusan')}
-                  className={errors.jurusan ? 'border-red-500' : ''}
-                />
-                {errors.jurusan && (
-                  <p className="mt-1 text-sm text-red-600">{errors.jurusan.message}</p>
-                )}
-              </div>
-
-              {/* File Uploads */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Upload Dokumen</h3>
-                
-                {/* KTM */}
-                <div>
-                  <Label htmlFor="ktm">Kartu Tanda Mahasiswa (KTM)</Label>
-                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                    <div className="space-y-1 text-center">
-                      <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                      <div className="flex text-sm text-gray-600">
-                        <label
-                          htmlFor="ktm"
-                          className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
-                        >
-                          <span>Upload file</span>
-                          <input
-                            id="ktm"
-                            name="ktm"
-                            type="file"
-                            className="sr-only"
-                            accept="image/*"
-                            onChange={(e) => handleFileChange('ktm', e.target.files?.[0] || null)}
-                          />
-                        </label>
-                      </div>
-                      <p className="text-xs text-gray-500">PNG, JPG, JPEG</p>
-                    </div>
-                  </div>
-                  {files.ktm && (
-                    <div className="mt-2 flex items-center text-sm text-green-600">
-                      <CheckCircle className="h-4 w-4 mr-1" />
-                      {files.ktm.name}
-                    </div>
-                  )}
-                </div>
-
-                {/* Berkas Pendukung */}
-                <div>
-                  <Label htmlFor="berkas">Berkas Pendukung</Label>
-                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                    <div className="space-y-1 text-center">
-                      <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                      <div className="flex text-sm text-gray-600">
-                        <label
-                          htmlFor="berkas"
-                          className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
-                        >
-                          <span>Upload file</span>
-                          <input
-                            id="berkas"
-                            name="berkas"
-                            type="file"
-                            className="sr-only"
-                            accept="image/*"
-                            onChange={(e) => handleFileChange('berkas', e.target.files?.[0] || null)}
-                          />
-                        </label>
-                      </div>
-                      <p className="text-xs text-gray-500">PNG, JPG, JPEG</p>
-                    </div>
-                  </div>
-                  {files.berkas && (
-                    <div className="mt-2 flex items-center text-sm text-green-600">
-                      <CheckCircle className="h-4 w-4 mr-1" />
-                      {files.berkas.name}
-                    </div>
-                  )}
-                </div>
-
-                {/* Foto Profil */}
-                <div>
-                  <Label htmlFor="foto">Foto Profil</Label>
-                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                    <div className="space-y-1 text-center">
-                      <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                      <div className="flex text-sm text-gray-600">
-                        <label
-                          htmlFor="foto"
-                          className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
-                        >
-                          <span>Upload file</span>
-                          <input
-                            id="foto"
-                            name="foto"
-                            type="file"
-                            className="sr-only"
-                            accept="image/*"
-                            onChange={(e) => handleFileChange('foto', e.target.files?.[0] || null)}
-                          />
-                        </label>
-                      </div>
-                      <p className="text-xs text-gray-500">PNG, JPG, JPEG</p>
-                    </div>
-                  </div>
-                  {files.foto && (
-                    <div className="mt-2 flex items-center text-sm text-green-600">
-                      <CheckCircle className="h-4 w-4 mr-1" />
-                      {files.foto.name}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Mendaftar...
-                  </>
-                ) : (
-                  'Daftar'
-                )}
-              </Button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
-                Sudah punya akun?{' '}
-                <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
-                  Masuk di sini
-                </Link>
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Kanan: Ilustrasi dan deskripsi */}
+        <div className="flex flex-col items-center text-center lg:text-left lg:items-end">
+          <p
+            className="mb-10 text-2xl md:text-4xl font-medium text-[#0D776B] max-w-xl leading-tight"
+          >
+            Bergabunglah dengan kami!
+          </p>
+          <img
+            src={goodTeamIllustration}
+            alt="Ilustrasi tim"
+            className="w-full max-w-lg md:max-w-xl h-auto drop-shadow-2xl"
+            loading="eager"
+          />
+        </div>
       </div>
     </div>
   );

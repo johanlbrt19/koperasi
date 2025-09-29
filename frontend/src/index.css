@@ -8,7 +8,8 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    /* Set global page background to #F0EFE7 (HSL approx 53 23% 92%) */
+    --background: 53 23% 92%;
     --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
@@ -17,7 +18,7 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 217 91% 60%;
+    --primary: 173 80% 26%;
     --primary-foreground: 0 0% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -34,15 +35,15 @@ All colors MUST be HSL.
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 217 91% 60%;
+    --ring: 173 80% 26%;
 
     --radius: 0.75rem;
 
     /* Custom design tokens */
-    --gradient-hero: linear-gradient(135deg, hsl(217 91% 60%), hsl(188 95% 68%));
+    --gradient-hero: linear-gradient(135deg, hsl(173 80% 26%), hsl(188 95% 68%));
     --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 40% 98%));
-    --shadow-elegant: 0 10px 30px -10px hsl(217 91% 60% / 0.2);
-    --shadow-hover: 0 20px 40px -10px hsl(217 91% 60% / 0.3);
+    --shadow-elegant: 0 10px 30px -10px hsl(173 80% 26% / 0.2);
+    --shadow-hover: 0 20px 40px -10px hsl(173 80% 26% / 0.3);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --sidebar-background: 0 0% 98%;
