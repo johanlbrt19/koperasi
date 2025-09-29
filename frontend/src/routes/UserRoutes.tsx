@@ -1,11 +1,11 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import UserLayout from '@/components/layouts/UserLayout';
-import UserDashboard from './UserDashboard';
-import Savings from './Savings';
-import Loans from './Loans';
-import Profile from './Profile';
-import Events from './Events';
+import UserDashboard from '@/pages/user/UserDashboard';
+import Savings from '@/pages/user/Savings';
+import Loans from '@/pages/user/Loans';
+import Profile from '@/pages/user/Profile';
+import Events from '@/pages/user/Events';
 
 const UserRoutes: React.FC = () => {
   return (
@@ -16,10 +16,11 @@ const UserRoutes: React.FC = () => {
         <Route path="/loans" element={<Loans />} />
         <Route path="/events" element={<Events />} />
         <Route path="/profile" element={<Profile />} />
-        {/* Add more user routes here */}
       </Routes>
     </UserLayout>
   );
 };
 
 export default UserRoutes;
+
+

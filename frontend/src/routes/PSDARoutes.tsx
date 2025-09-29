@@ -1,12 +1,12 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import PSDALayout from '@/components/layouts/PSDALayout';
-import PSDADashboard from './PSDADashboard';
-import FinancialReports from './FinancialReports';
-import PSDAEvents from './events/PSDAEvents';
-import PSDAEventForm from './events/PSDAEventForm';
-import PSDAApplications from './applications/PSDAApplications';
-import PSDAApplicationDetail from './applications/PSDAApplicationDetail';
+import PSDADashboard from '@/pages/psda/PSDADashboard';
+import FinancialReports from '@/pages/psda/FinancialReports';
+import PSDAEvents from '@/pages/psda/events/PSDAEvents';
+import PSDAEventForm from '@/pages/psda/events/PSDAEventForm';
+import PSDAApplications from '@/pages/psda/applications/PSDAApplications';
+import PSDAApplicationDetail from '@/pages/psda/applications/PSDAApplicationDetail';
 
 const PSDARoutes: React.FC = () => {
   return (
@@ -25,3 +25,5 @@ const PSDARoutes: React.FC = () => {
 };
 
 export default PSDARoutes;
+
+

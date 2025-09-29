@@ -1,9 +1,9 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocation } from 'react-router-dom';
-import UserRoutes from '@/pages/user/UserRoutes';
-import AdminRoutes from '@/pages/admin/AdminRoutes';
-import PSDARoutes from '@/pages/psda/PSDARoutes';
+import UserRoutes from '@/routes/UserRoutes';
+import AdminRoutes from '@/routes/AdminRoutes';
+import PSDARoutes from '@/routes/PSDARoutes';
 
 const RoleRouter: React.FC = () => {
   const { user } = useAuth();
