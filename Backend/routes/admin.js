@@ -19,13 +19,6 @@ const router = express.Router();
 router.use(protect);
 router.use(authorize('admin'));
 
-// Application management (admin)
-router.get('/applications/pending', getPendingApplications);
-router.get('/applications', getAllApplications);
-router.get('/applications/:id', getApplicationDetails);
-router.put('/applications/:id/approve', approveApplication);
-router.put('/applications/:id/reject', rejectApplication);
-
 // Statistics (admin)
 router.get('/stats', getStats);
 

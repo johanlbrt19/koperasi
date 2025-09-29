@@ -16,7 +16,8 @@ import {
   LogOut,
   Building,
   CreditCard,
-  TrendingUp
+  TrendingUp,
+  Calendar
 } from 'lucide-react';
 
 interface PSDALayoutProps {
@@ -30,13 +31,8 @@ const PSDALayout: React.FC<PSDALayoutProps> = ({ children }) => {
 
   const navigation = [
     { name: 'Dashboard', href: '/psda/dashboard', icon: Home },
+    { name: 'Pendaftaran', href: '/psda/applications', icon: Shield },
     { name: 'Manajemen Event', href: '/psda/events', icon: Calendar },
-    { name: 'Laporan Keuangan', href: '/psda/reports', icon: FileText },
-    { name: 'Monitoring Keuangan', href: '/psda/financial', icon: BarChart3 },
-    { name: 'Manajemen Data', href: '/psda/data', icon: Database },
-    { name: 'Audit & Compliance', href: '/psda/audit', icon: Shield },
-    { name: 'Laporan Regulator', href: '/psda/regulatory', icon: TrendingUp },
-    { name: 'Pengaturan', href: '/psda/settings', icon: Settings },
   ];
 
   const isActive = (href: string) => {

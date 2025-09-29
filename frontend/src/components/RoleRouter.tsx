@@ -21,10 +21,9 @@ const RoleRouter: React.FC = () => {
   const getRoutes = () => {
     if (roleFromPath === 'user' || user.role === 'user') {
       return <UserRoutes />;
-    } else if (roleFromPath === 'admin' || user.role === 'psda') {
-      // Swap admin and psda mapping as requested
+    } else if (roleFromPath === 'admin' || user.role === 'admin') {
       return <AdminRoutes />;
-    } else if (roleFromPath === 'psda' || user.role === 'admin') {
+    } else if (roleFromPath === 'psda' || user.role === 'psda') {
       return <PSDARoutes />;
     } else {
       // Default to user role if no specific role in path

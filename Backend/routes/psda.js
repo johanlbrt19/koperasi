@@ -2,12 +2,27 @@ const express = require('express');
 const { protect, authorize } = require('../middleware/auth');
 const upload = require('../config/multer');
 const Event = require('../models/Event');
+const {
+  getPendingApplications,
+  getAllApplications,
+  getApplicationDetails,
+  approveApplication,
+  rejectApplication,
+  getStats,
+} = require('../controllers/adminController');
 
 const router = express.Router();
 
 // Protect and authorize PSDA only
 router.use(protect);
 router.use(authorize('psda'));
+
+// PSDA controls applications approval/review
+router.get('/applications/pending', getPendingApplications);
+router.get('/applications', getAllApplications);
+router.get('/applications/:id', getApplicationDetails);
+router.put('/applications/:id/approve', approveApplication);
+router.put('/applications/:id/reject', rejectApplication);
 
 // Create event
 router.post('/events', upload.single('poster'), async (req, res) => {

@@ -235,6 +235,24 @@ class ApiClient {
   async deleteEvent(id: string): Promise<ApiResponse> {
     return this.request(`/psda/events/${id}`, { method: 'DELETE' });
   }
+
+  // PSDA Applications
+  async listApplications(status?: 'pending' | 'approved' | 'rejected'): Promise<ApiResponse<{ applications: any[] }>> {
+    const qs = status ? `?status=${status}` : '';
+    return this.request(`/psda/applications${qs}`);
+  }
+
+  async getApplication(id: string): Promise<ApiResponse<{ application: any }>> {
+    return this.request(`/psda/applications/${id}`);
+  }
+
+  async approveApplication(id: string): Promise<ApiResponse> {
+    return this.request(`/psda/applications/${id}/approve`, { method: 'PUT' });
+  }
+
+  async rejectApplication(id: string, reason?: string): Promise<ApiResponse> {
+    return this.request(`/psda/applications/${id}/reject`, { method: 'PUT', body: JSON.stringify({ reason }) });
+  }
 }
 
 export const apiClient = new ApiClient(API_BASE_URL);

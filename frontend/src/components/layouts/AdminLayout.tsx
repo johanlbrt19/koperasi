@@ -29,11 +29,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
   const navigation = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: Home },
-    { name: 'Manajemen Anggota', href: '/admin/members', icon: Users },
-    { name: 'Simpanan', href: '/admin/savings', icon: CreditCard },
-    { name: 'Pinjaman', href: '/admin/loans', icon: FileText },
-    { name: 'Laporan', href: '/admin/reports', icon: BarChart3 },
-    { name: 'Pengaturan', href: '/admin/settings', icon: Settings },
+    { name: 'Kelola Role User', href: '/admin/users', icon: Users },
+    { name: 'Monitoring', href: '/admin/reports', icon: BarChart3 },
   ];
 
   const isActive = (href: string) => {
