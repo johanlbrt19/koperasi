@@ -26,8 +26,7 @@ const UserLayout: React.FC<UserLayoutProps> = ({ children }) => {
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: Home },
-    { name: 'Simpanan', href: '/user/savings', icon: CreditCard },
-    { name: 'Pinjaman', href: '/user/loans', icon: FileText },
+    // { name: 'Simpanan', href: '/user/savings', icon: CreditCard },
     { name: 'Kegiatan', href: '/user/events', icon: Calendar },
     { name: 'Profil', href: '/user/profile', icon: User },
   ];

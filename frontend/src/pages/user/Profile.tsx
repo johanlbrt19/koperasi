@@ -9,6 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { User, Mail, GraduationCap, Building, Camera, Save } from 'lucide-react';
+import config from '@/config/env';
+import { apiClient } from '@/lib/api';
 
 const Profile: React.FC = () => {
   const { user, updateUser } = useAuth();
@@ -74,14 +76,29 @@ const Profile: React.FC = () => {
     setIsEditMode(false);
   };
 
-  const handlePhotoUpload = (file: File) => {
-    console.log('Upload photo:', file);
-    // Implement photo upload logic
-    setIsUploadDialogOpen(false);
-    toast({
-      title: "Foto Berhasil Diupload",
-      description: "Foto profil Anda telah diperbarui.",
-    });
+  const handlePhotoUpload = async (file: File) => {
+    try {
+      const res = await apiClient.uploadProfilePhoto(file);
+      if (res.success && res.data) {
+        const filename = res.data.fotoProfile;
+        if (user) {
+          const updatedUser = { ...user, fotoProfile: filename };
+          updateUser(updatedUser);
+        }
+        toast({
+          title: "Foto Berhasil Diupload",
+          description: "Foto profil Anda telah diperbarui.",
+        });
+      }
+    } catch (err) {
+      toast({
+        title: "Gagal Upload Foto",
+        description: "Silakan coba lagi.",
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUploadDialogOpen(false);
+    }
   };
 
   return (
@@ -105,7 +122,7 @@ const Profile: React.FC = () => {
               <CardContent className="text-center">
                 <div className="relative inline-block">
                   <Avatar className="w-32 h-32 mx-auto">
-                    <AvatarImage src={user?.fotoProfile ? `/uploads/foto/${user.fotoProfile}` : undefined} />
+                    <AvatarImage src={user?.fotoProfile ? `${config.assetsBaseUrl}/uploads/foto/${user.fotoProfile}` : undefined} />
                     <AvatarFallback>
                       <User className="w-16 h-16" />
                     </AvatarFallback>

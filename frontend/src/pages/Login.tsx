@@ -27,7 +27,7 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const from = location.state?.from?.pathname || '/dashboard';
+  const fromState = location.state?.from?.pathname as string | undefined;
 
   const {
     register,
@@ -47,7 +47,13 @@ const Login: React.FC = () => {
         description: "Selamat datang kembali!",
       });
       
-      navigate(from, { replace: true });
+      // After login, redirect to role dashboard unless a previous 'from' exists
+      const storedUserRaw = localStorage.getItem('user');
+      const storedUser = storedUserRaw ? JSON.parse(storedUserRaw) : null;
+      const role = storedUser?.role || 'user';
+      const isRolePath = fromState && (/^\/(user|admin|psda)\//.test(fromState));
+      const destination = isRolePath ? (fromState as string) : `/${role}/dashboard`;
+      navigate(destination, { replace: true });
     } catch (error: any) {
       toast({
         title: "Login Gagal",

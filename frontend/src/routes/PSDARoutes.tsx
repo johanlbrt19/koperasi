@@ -2,7 +2,6 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import PSDALayout from '@/components/layouts/PSDALayout';
 import PSDADashboard from '@/pages/psda/PSDADashboard';
-import FinancialReports from '@/pages/psda/FinancialReports';
 import PSDAEvents from '@/pages/psda/events/PSDAEvents';
 import PSDAEventForm from '@/pages/psda/events/PSDAEventForm';
 import PSDAApplications from '@/pages/psda/applications/PSDAApplications';
@@ -13,7 +12,6 @@ const PSDARoutes: React.FC = () => {
     <PSDALayout>
       <Routes>
         <Route path="/" element={<PSDADashboard />} />
-        <Route path="/reports" element={<FinancialReports />} />
         <Route path="/events" element={<PSDAEvents />} />
         <Route path="/events/new" element={<PSDAEventForm />} />
         <Route path="/events/:id" element={<PSDAEventForm />} />

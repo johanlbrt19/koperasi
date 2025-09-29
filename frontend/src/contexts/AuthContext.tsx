@@ -7,6 +7,8 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (nim: string, password: string) => Promise<void>;
+  loginWithToken: (nim: string, email: string, otp: string) => Promise<void>;
+  requestLoginToken: (nim: string, email: string) => Promise<void>;
   register: (formData: FormData) => Promise<void>;
   logout: () => void;
   updateUser: (user: User) => void;
@@ -82,6 +84,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const requestLoginToken = async (nim: string, email: string) => {
+    await apiClient.requestLoginToken(nim, email);
+  };
+
+  const loginWithToken = async (nim: string, email: string, otp: string) => {
+    const response = await apiClient.loginWithToken(nim, email, otp);
+    if (response.success && response.data && response.token) {
+      setUser(response.data.user);
+      setToken(response.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem('token', response.token);
+    } else {
+      throw new Error(response.message || 'Login dengan token gagal');
+    }
+  };
+
   const register = async (formData: FormData) => {
     try {
       const response = await apiClient.register(formData);
@@ -117,6 +135,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading,
     isAuthenticated,
     login,
+    loginWithToken,
+    requestLoginToken,
     register,
     logout,
     updateUser,

@@ -26,16 +26,25 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   if (requireAuth && !isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/" state={{ from: location }} replace />;
   }
 
   if (requireAuth && isAuthenticated && user?.status !== 'approved') {
     return <Navigate to="/pending-approval" replace />;
   }
 
-  // if (requireRole && user?.role !== requireRole) {
-  //   return <Navigate to="/unauthorized" replace />;
-  // }
+  if (requireRole) {
+    if (!user) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      );
+    }
+    if (user.role !== requireRole) {
+      return <Navigate to="/unauthorized" replace />;
+    }
+  }
 
   if (!requireAuth && isAuthenticated) {
     return <Navigate to={`/${user?.role}/dashboard`} replace />;

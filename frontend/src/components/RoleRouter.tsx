@@ -17,18 +17,17 @@ const RoleRouter: React.FC = () => {
   const pathSegments = location.pathname.split('/');
   const roleFromPath = pathSegments[1]; // e.g., 'user', 'admin', 'psda'
 
-  // Determine which routes to render based on path or user role
+  // Determine which routes to render
+  // 1) If the URL path explicitly specifies a role, honor it.
+  // 2) Otherwise, fall back to the authenticated user's role.
   const getRoutes = () => {
-    if (roleFromPath === 'user' || user.role === 'user') {
-      return <UserRoutes />;
-    } else if (roleFromPath === 'admin' || user.role === 'admin') {
-      return <AdminRoutes />;
-    } else if (roleFromPath === 'psda' || user.role === 'psda') {
-      return <PSDARoutes />;
-    } else {
-      // Default to user role if no specific role in path
-      return <UserRoutes />;
-    }
+    if (roleFromPath === 'user') return <UserRoutes />;
+    if (roleFromPath === 'admin') return <AdminRoutes />;
+    if (roleFromPath === 'psda') return <PSDARoutes />;
+    
+    if (user.role === 'admin') return <AdminRoutes />;
+    if (user.role === 'psda') return <PSDARoutes />;
+    return <UserRoutes />;
   };
 
   return getRoutes();

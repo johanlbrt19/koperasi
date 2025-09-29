@@ -18,8 +18,11 @@ const PSDAEventForm: React.FC = () => {
   const [form, setForm] = useState({
     title: '',
     description: '',
+    category: 'Workshop',
     date: '',
     time: '',
+    startTime: '',
+    endTime: '',
     location: '',
     enableAttendance: true,
   });
@@ -36,8 +39,11 @@ const PSDAEventForm: React.FC = () => {
           setForm({
             title: ev.title || '',
             description: ev.description || '',
+            category: ev.category || 'Workshop',
             date: ev.date ? String(ev.date).slice(0, 10) : '',
             time: ev.time || '',
+            startTime: ev.startTime || '',
+            endTime: ev.endTime || '',
             location: ev.location || '',
             enableAttendance: Boolean(ev.enableAttendance),
           });
@@ -100,8 +106,18 @@ const PSDAEventForm: React.FC = () => {
                     <Input id="date" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required />
                   </div>
                   <div>
-                    <Label htmlFor="time">Waktu</Label>
-                    <Input id="time" type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} />
+                    <Label htmlFor="category">Kategori</Label>
+                    <Input id="category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="startTime">Mulai</Label>
+                    <Input id="startTime" type="time" value={form.startTime} onChange={(e) => setForm({ ...form, startTime: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label htmlFor="endTime">Selesai</Label>
+                    <Input id="endTime" type="time" value={form.endTime} onChange={(e) => setForm({ ...form, endTime: e.target.value })} />
                   </div>
                 </div>
                 <div>

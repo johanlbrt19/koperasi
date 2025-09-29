@@ -5,6 +5,8 @@ const {
   getMe, 
   forgotPassword, 
   resetPassword, 
+  requestLoginToken,
+  loginWithToken,
   updateProfile, 
   changePassword, 
   uploadProfilePhoto 
@@ -24,6 +26,8 @@ router.post('/register', upload.fields([
 router.post('/login', login);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
+router.post('/request-login-token', requestLoginToken);
+router.post('/login-with-token', loginWithToken);
 
 // Protected routes
 router.get('/me', protect, getMe);

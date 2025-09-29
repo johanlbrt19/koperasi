@@ -27,13 +27,16 @@ router.put('/applications/:id/reject', rejectApplication);
 // Create event
 router.post('/events', upload.single('poster'), async (req, res) => {
   try {
-    const { title, description, date, time, location, enableAttendance } = req.body;
+    const { title, description, date, time, startTime, endTime, location, enableAttendance, category } = req.body;
     const event = await Event.create({
       title,
       description,
       date,
       time,
+      startTime,
+      endTime,
       location,
+      category,
       poster: req.file ? req.file.filename : null,
       enableAttendance: enableAttendance !== 'false',
       createdBy: req.user._id
@@ -69,8 +72,8 @@ router.get('/events/:id', async (req, res) => {
 // Update event
 router.put('/events/:id', upload.single('poster'), async (req, res) => {
   try {
-    const { title, description, date, time, location, enableAttendance } = req.body;
-    const update = { title, description, date, time, location };
+    const { title, description, date, time, startTime, endTime, location, enableAttendance, category } = req.body;
+    const update = { title, description, date, time, startTime, endTime, location, category };
     if (typeof enableAttendance !== 'undefined') update.enableAttendance = enableAttendance !== 'false';
     if (req.file) update.poster = req.file.filename;
 

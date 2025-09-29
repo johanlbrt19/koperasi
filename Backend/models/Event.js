@@ -6,6 +6,11 @@ const eventSchema = new mongoose.Schema({
     required: [true, 'Judul acara wajib diisi'],
     trim: true
   },
+  category: {
+    type: String,
+    default: 'Workshop',
+    trim: true
+  },
   description: {
     type: String,
     default: ''
@@ -15,6 +20,14 @@ const eventSchema = new mongoose.Schema({
     required: [true, 'Tanggal acara wajib diisi']
   },
   time: {
+    type: String,
+    default: ''
+  },
+  startTime: {
+    type: String,
+    default: ''
+  },
+  endTime: {
     type: String,
     default: ''
   },
@@ -42,7 +55,14 @@ const eventSchema = new mongoose.Schema({
     required: true
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+// Virtuals
+eventSchema.virtual('attendeeCount').get(function() {
+  return Array.isArray(this.attendance) ? this.attendance.length : 0;
 });
 
 module.exports = mongoose.model('Event', eventSchema);

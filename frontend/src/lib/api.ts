@@ -21,6 +21,21 @@ export interface User {
   fotoProfile?: string;
 }
 
+export interface EventItemApi {
+  _id: string;
+  title: string;
+  description?: string;
+  category?: string;
+  date: string;
+  time?: string;
+  startTime?: string;
+  endTime?: string;
+  location: string;
+  poster?: string | null;
+  enableAttendance: boolean;
+  attendeeCount?: number;
+}
+
 export interface RegisterData {
   nim: string;
   nama: string;
@@ -117,10 +132,17 @@ class ApiClient {
     });
   }
 
-  async resetPassword(token: string, password: string): Promise<ApiResponse> {
-    return this.request('/auth/reset-password', {
+  async requestLoginToken(nim: string, email: string): Promise<ApiResponse> {
+    return this.request('/auth/request-login-token', {
       method: 'POST',
-      body: JSON.stringify({ token, password }),
+      body: JSON.stringify({ nim, email }),
+    });
+  }
+
+  async loginWithToken(nim: string, email: string, otp: string): Promise<ApiResponse<{ user: User }>> {
+    return this.request<{ user: User }>('/auth/login-with-token', {
+      method: 'POST',
+      body: JSON.stringify({ nim, email, otp }),
     });
   }
 
@@ -160,19 +182,22 @@ class ApiClient {
   }
 
   // PSDA Events
-  async listEvents(): Promise<ApiResponse<{ events: any[] }>> {
+  async listEvents(): Promise<ApiResponse<{ events: EventItemApi[] }>> {
     return this.request('/psda/events');
   }
 
-  async getEvent(id: string): Promise<ApiResponse<{ event: any }>> {
+  async getEvent(id: string): Promise<ApiResponse<{ event: EventItemApi }>> {
     return this.request(`/psda/events/${id}`);
   }
 
   async createEvent(payload: {
     title: string;
     description?: string;
+    category?: string;
     date: string;
     time?: string;
+    startTime?: string;
+    endTime?: string;
     location: string;
     enableAttendance?: boolean;
     poster?: File | null;
@@ -180,8 +205,11 @@ class ApiClient {
     const formData = new FormData();
     formData.append('title', payload.title);
     if (payload.description) formData.append('description', payload.description);
+    if (payload.category) formData.append('category', payload.category);
     formData.append('date', payload.date);
     if (payload.time) formData.append('time', payload.time);
+    if (payload.startTime) formData.append('startTime', payload.startTime);
+    if (payload.endTime) formData.append('endTime', payload.endTime);
     formData.append('location', payload.location);
     if (typeof payload.enableAttendance !== 'undefined') formData.append('enableAttendance', String(payload.enableAttendance));
     if (payload.poster) formData.append('poster', payload.poster);
@@ -203,8 +231,11 @@ class ApiClient {
   async updateEvent(id: string, payload: {
     title?: string;
     description?: string;
+    category?: string;
     date?: string;
     time?: string;
+    startTime?: string;
+    endTime?: string;
     location?: string;
     enableAttendance?: boolean;
     poster?: File | null;
@@ -212,8 +243,11 @@ class ApiClient {
     const formData = new FormData();
     if (payload.title) formData.append('title', payload.title);
     if (payload.description) formData.append('description', payload.description);
+    if (payload.category) formData.append('category', payload.category);
     if (payload.date) formData.append('date', payload.date);
     if (payload.time) formData.append('time', payload.time);
+    if (payload.startTime) formData.append('startTime', payload.startTime);
+    if (payload.endTime) formData.append('endTime', payload.endTime);
     if (payload.location) formData.append('location', payload.location);
     if (typeof payload.enableAttendance !== 'undefined') formData.append('enableAttendance', String(payload.enableAttendance));
     if (payload.poster) formData.append('poster', payload.poster);

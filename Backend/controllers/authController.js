@@ -205,6 +205,104 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
+// Request OTP login token
+exports.requestLoginToken = async (req, res) => {
+  try {
+    const { nim, email } = req.body;
+
+    const user = await User.findOne({ nim, email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Akun tidak tersedia' });
+    }
+
+    // Generate 6-digit OTP and store hashed (use direct update to avoid unrelated validation)
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    const hashed = crypto.createHash('sha256').update(otp).digest('hex');
+    await User.updateOne(
+      { _id: user._id },
+      { $set: { otpCode: hashed, otpExpire: Date.now() + 5 * 60 * 1000 } },
+      { runValidators: false }
+    );
+
+    await sendEmail({
+      email: user.email,
+      subject: 'Kode Login Sementara (OTP) - Koperasi Mahasiswa',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style=\"color: #2c5530;\">Koperasi Mahasiswa UIN Sunan Gunung Jati Bandung</h2>
+          <p>Assalamu'alaikum ${user.nama},</p>
+          <p>Berikut adalah kode login sementara Anda. Kode berlaku selama 5 menit.</p>
+          <div style=\"font-size: 28px; font-weight: bold; letter-spacing: 4px; padding: 12px 20px; background:#f3f4f6; display:inline-block; border-radius:8px;\">${otp}</div>
+          <p style=\"margin-top:16px;\">Masukkan kode ini pada halaman "Login dengan Token".</p>
+        </div>
+      `
+    });
+
+    res.status(200).json({ success: true, message: 'Kode OTP telah dikirim ke email' });
+  } catch (error) {
+    console.error('requestLoginToken error:', error);
+    res.status(500).json({ success: false, message: 'Server error. Silakan coba lagi.' });
+  }
+};
+
+// Login with OTP token
+exports.loginWithToken = async (req, res) => {
+  try {
+    const { nim, email, otp } = req.body;
+
+    const user = await User.findOne({ nim, email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'NIM atau email tidak ditemukan' });
+    }
+
+    const hashed = crypto.createHash('sha256').update(String(otp)).digest('hex');
+    if (!user.otpCode || user.otpCode !== hashed || !user.otpExpire || user.otpExpire < Date.now()) {
+      return res.status(400).json({ success: false, message: 'Kode token tidak valid atau kadaluarsa' });
+    }
+
+    // Check approval for regular users
+    if (user.status !== 'approved' && user.role === 'user') {
+      let message = 'Akun Anda belum disetujui oleh admin';
+      if (user.status === 'rejected') {
+        message = `Akun Anda ditolak. Alasan: ${user.rejectionReason || 'Tidak ada alasan spesifik'}`;
+      }
+      return res.status(403).json({ success: false, message });
+    }
+
+    // Clear OTP and issue JWT (use direct update)
+    await User.updateOne(
+      { _id: user._id },
+      { $unset: { otpCode: 1, otpExpire: 1 } },
+      { runValidators: false }
+    );
+
+    const token = signToken(user._id);
+    await createActivityLog(user._id, 'login', `${user.nama} login dengan OTP`);
+
+    res.status(200).json({
+      success: true,
+      message: 'Login via token berhasil',
+      token,
+      data: {
+        user: {
+          id: user._id,
+          nim: user.nim,
+          nama: user.nama,
+          email: user.email,
+          fakultas: user.fakultas,
+          jurusan: user.jurusan,
+          role: user.role,
+          status: user.status,
+          fotoProfile: user.fotoProfile
+        }
+      }
+    });
+  } catch (error) {
+    console.error('loginWithToken error:', error);
+    res.status(500).json({ success: false, message: 'Server error. Silakan coba lagi.' });
+  }
+};
+
 // Reset password
 exports.resetPassword = async (req, res) => {
   try {
