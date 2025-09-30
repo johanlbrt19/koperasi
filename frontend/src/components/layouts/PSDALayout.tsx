@@ -101,7 +101,7 @@ const PSDALayout: React.FC<PSDALayoutProps> = ({ children }) => {
 
       {/* Desktop sidebar */}
       <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
-        <div className="flex flex-col flex-grow bg-white border-r border-gray-200">
+        <div className="flex flex-col flex-grow bg-white border-r border-gray-200 shadow-2xl">
           <div className="flex items-center px-4 py-6">
             <Building className="h-8 w-8 text-primary" />
             <h1 className="ml-2 text-xl font-bold">PSDA Panel</h1>

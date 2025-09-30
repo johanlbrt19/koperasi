@@ -13,6 +13,9 @@ export default {
       },
     },
     extend: {
+      boxShadow: {
+        "sidebar-shadow": "var(--sidebar-shadow)", // ✅ taruh di sini
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

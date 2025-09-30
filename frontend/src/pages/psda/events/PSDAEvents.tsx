@@ -41,12 +41,12 @@ const PSDAEvents: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Manajemen Event</h1>
+              <h1 className="text-3xl font-bold text-[#0D776B]">Manajemen Event</h1>
               <p className="text-gray-600">Kelola event koperasi</p>
             </div>
             <Button onClick={() => navigate('/psda/events/new')}>

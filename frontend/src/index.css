@@ -61,6 +61,8 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    --sidebar-shadow: 0 4px 20px -2px hsla(240, 8%, 10%, 0.2);
   }
 
   .dark {
