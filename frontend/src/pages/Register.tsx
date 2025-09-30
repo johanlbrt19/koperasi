@@ -8,12 +8,101 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Upload, CheckCircle } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Loader2, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import Header from '@/components/Header';
 import goodTeamIllustration from '@/assets/team checklist-amico.svg';
+
+// --- Komponen untuk File Upload ---
+type FileUploadPreviewProps = {
+  id: 'ktm' | 'berkas' | 'foto';
+  label: string;
+  previewUrl: string | null;
+  fileName: string | undefined;
+  onFileChange: (field: 'ktm' | 'berkas' | 'foto', file: File | null) => void;
+  previewType?: 'avatar' | 'image';
+};
+
+const FileUploadPreview: React.FC<FileUploadPreviewProps> = ({
+  id,
+  label,
+  previewUrl,
+  fileName,
+  onFileChange,
+  previewType = 'image',
+}) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onFileChange(id, e.target.files?.[0] || null);
+  };
+
+  return (
+    <div>
+      <Label>{label}</Label>
+      <div className="mt-1">
+        {!previewUrl ? (
+          // Tampilan Awal (Sebelum Upload)
+          <label
+            htmlFor={id}
+            className="relative flex justify-center w-full px-3 py-3 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-indigo-500"
+          >
+            <div className="space-y-1 text-center">
+              <Upload className="mx-auto h-6 w-6 text-gray-400" />
+              <div className="flex text-xs text-gray-600">
+                <span className="font-medium text-indigo-600">Upload file</span>
+              </div>
+              <p className="text-xs text-gray-500">PNG, JPG, JPEG</p>
+            </div>
+            <input
+              id={id}
+              name={id}
+              type="file"
+              className="sr-only"
+              accept="image/*"
+              onChange={handleInputChange}
+            />
+          </label>
+        ) : (
+          // Tampilan Setelah Upload (Diperbarui)
+          <div className="flex items-center gap-4 p-2 border border-gray-300 rounded-md">
+            {/* Bagian gambar sekarang menjadi tautan untuk melihat detail */}
+            <a href={previewUrl} target="_blank" rel="noopener noreferrer" title="Klik untuk lihat detail">
+              <img
+                src={previewUrl}
+                alt={`Preview ${label}`}
+                className={
+                  previewType === 'avatar'
+                    ? "h-14 w-14 rounded-full object-cover border hover:opacity-80 transition-opacity"
+                    : "h-14 w-20 rounded-md object-cover border hover:opacity-80 transition-opacity"
+                }
+              />
+            </a>
+            <div className="flex-grow">
+              <p className="text-sm font-medium text-gray-800 truncate" title={fileName}>
+                {fileName}
+              </p>
+              {/* Label ini sekarang menjadi satu-satunya pemicu untuk mengganti file */}
+              <label 
+                htmlFor={id} 
+                className="text-xs font-medium text-indigo-600 cursor-pointer hover:underline"
+              >
+                Ganti file
+              </label>
+            </div>
+            <input
+              id={id}
+              name={id}
+              type="file"
+              className="sr-only"
+              accept="image/*"
+              onChange={handleInputChange}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 
 const registerSchema = z.object({
   nim: z.string().min(1, 'NIM wajib diisi'),
@@ -41,6 +130,7 @@ const fakultasOptions = [
   'Fakultas Ushuluddin'
 ];
 
+// --- Komponen Utama Register ---
 const Register: React.FC = () => {
   const { register: registerUser } = useAuth();
   const navigate = useNavigate();
@@ -55,28 +145,42 @@ const Register: React.FC = () => {
     berkas: null,
     foto: null,
   });
-  const [fotoPreview, setFotoPreview] = useState<string | null>(null);
+
+  const [previews, setPreviews] = useState<{
+    ktm: string | null;
+    berkas: string | null;
+    foto: string | null;
+  }>({
+    ktm: null,
+    berkas: null,
+    foto: null,
+  });
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
-    watch,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   });
 
   const handleFileChange = (field: 'ktm' | 'berkas' | 'foto', file: File | null) => {
     setFiles(prev => ({ ...prev, [field]: file }));
-    if (field === 'foto') {
-      if (fotoPreview) URL.revokeObjectURL(fotoPreview);
-      setFotoPreview(file ? URL.createObjectURL(file) : null);
+    
+    if (previews[field]) {
+      URL.revokeObjectURL(previews[field] as string);
+    }
+    
+    if (file) {
+      const newPreviewUrl = URL.createObjectURL(file);
+      setPreviews(prev => ({ ...prev, [field]: newPreviewUrl }));
+    } else {
+      setPreviews(prev => ({ ...prev, [field]: null }));
     }
   };
 
   const onSubmit = async (data: RegisterFormData) => {
-    // Validate files
     if (!files.ktm || !files.berkas || !files.foto) {
       toast({
         title: "Error",
@@ -119,17 +223,15 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pt-24 pb-12 px-4 sm:px-6 lg:px-8">
-      <Header />
+    <div className="min-h-screen bg-background pt-12 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
         {/* Kiri: Form pendaftaran */}
         <div>
           <div className="mb-3">
-            <h2 className="text-2xl font-bold text-gray-900">Daftar Akun</h2>
-            <p className="mt-1 text-xs text-gray-600">Bergabung dengan Koperasi Mahasiswa UIN SGD Bandung</p>
+            <h2 className="text-2xl font-bold text-[#0D776B] text-center">Daftar Akun</h2>
           </div>
 
-          <Card className="shadow-sm">
+          <Card className="shadow-xl shadow-black/2">
             <CardContent className="pt-2">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-2 [&_input]:h-8 [&_input]:py-1 [&_input]:text-sm [&_input]:bg-white [&_input::placeholder]:text-xs">
                 {/* NIM */}
@@ -150,11 +252,12 @@ const Register: React.FC = () => {
                 <div>
                   <Label htmlFor="nama">Nama Lengkap</Label>
                   <Input
-        id="nama"
-        type="text"
-        placeholder="Nama lengkap"
-        className={`${errors.nama ? 'border-red-500' : ''} placeholder:text-xs`}
-      />
+                    id="nama"
+                    type="text"
+                    {...register('nama')}
+                    placeholder="Nama lengkap"
+                    className={`${errors.nama ? 'border-red-500' : ''} placeholder:text-xs`}
+                  />
                   {errors.nama && (
                     <p className="mt-1 text-sm text-red-600">{errors.nama.message}</p>
                   )}
@@ -166,6 +269,7 @@ const Register: React.FC = () => {
                   <Input
                     id="email"
                     type="email"
+                    {...register('email')}
                     placeholder="Email"
                     className={`${errors.email ? 'border-red-500' : ''} placeholder:text-xs bg-white`}
                   />
@@ -206,12 +310,20 @@ const Register: React.FC = () => {
                 <div>
                   <Label htmlFor="fakultas">Fakultas</Label>
                   <Select onValueChange={(value) => setValue('fakultas', value)}>
-                    <SelectTrigger className={`${errors.fakultas ? 'border-red-500' : ''} h-8 text-sm`}>
+                    <SelectTrigger 
+                    className={`
+                        ${errors.fakultas ? 'border-red-500' : ''}
+                        h-8 text-sm bg-white focus:ring-1 focus:ring-[#00710A] focus:border-[#00710A]
+                      `}>
                       <SelectValue placeholder="Pilih fakultas" />
                     </SelectTrigger>
                     <SelectContent>
                       {fakultasOptions.map((fakultas) => (
-                        <SelectItem key={fakultas} value={fakultas}>
+                        <SelectItem
+                          key={fakultas}
+                          value={fakultas}
+                          className="focus:bg-[#00710A] focus:text-white hover:bg-[#00710A]/90 hover:text-white"
+                        >
                           {fakultas}
                         </SelectItem>
                       ))}
@@ -237,112 +349,33 @@ const Register: React.FC = () => {
                 </div>
 
                 {/* File Uploads */}
-                <div className="space-y-3">
+                <div className="space-y-4 pt-2">
                   <h3 className="text-base font-medium">Upload Dokumen</h3>
                   
-                  {/* KTM */}
-                  <div>
-                    <Label htmlFor="ktm">Kartu Tanda Mahasiswa (KTM)</Label>
-                    <div className="mt-1 flex justify-center px-3 py-3 border-2 border-gray-300 border-dashed rounded-md">
-                      <div className="space-y-1 text-center">
-                        <Upload className="mx-auto h-6 w-6 text-gray-400" />
-                        <div className="flex text-xs text-gray-600">
-                          <label
-                            htmlFor="ktm"
-                            className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
-                          >
-                            <span>Upload file</span>
-                            <input
-                              id="ktm"
-                              name="ktm"
-                              type="file"
-                              className="sr-only"
-                              accept="image/*"
-                              onChange={(e) => handleFileChange('ktm', e.target.files?.[0] || null)}
-                            />
-                          </label>
-                        </div>
-                        <p className="text-xs text-gray-500">PNG, JPG, JPEG</p>
-                      </div>
-                    </div>
-                    {files.ktm && (
-                      <div className="mt-2 flex items-center text-sm text-green-600">
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        {files.ktm.name}
-                      </div>
-                    )}
-                  </div>
+                  <FileUploadPreview
+                    id="ktm"
+                    label="Kartu Tanda Mahasiswa (KTM)"
+                    previewUrl={previews.ktm}
+                    fileName={files.ktm?.name}
+                    onFileChange={handleFileChange}
+                  />
 
-                  {/* Berkas Pendukung */}
-                  <div>
-                    <Label htmlFor="berkas">Berkas Pendukung</Label>
-                    <div className="mt-1 flex justify-center px-3 py-3 border-2 border-gray-300 border-dashed rounded-md">
-                      <div className="space-y-1 text-center">
-                        <Upload className="mx-auto h-6 w-6 text-gray-400" />
-                        <div className="flex text-xs text-gray-600">
-                          <label
-                            htmlFor="berkas"
-                            className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
-                          >
-                            <span>Upload file</span>
-                            <input
-                              id="berkas"
-                              name="berkas"
-                              type="file"
-                              className="sr-only"
-                              accept="image/*"
-                              onChange={(e) => handleFileChange('berkas', e.target.files?.[0] || null)}
-                            />
-                          </label>
-                        </div>
-                        <p className="text-xs text-gray-500">PNG, JPG, JPEG</p>
-                      </div>
-                    </div>
-                    {files.berkas && (
-                      <div className="mt-2 flex items-center text-sm text-green-600">
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        {files.berkas.name}
-                      </div>
-                    )}
-                  </div>
+                  <FileUploadPreview
+                    id="berkas"
+                    label="Berkas Pendukung"
+                    previewUrl={previews.berkas}
+                    fileName={files.berkas?.name}
+                    onFileChange={handleFileChange}
+                  />
 
-                  {/* Foto Profil */}
-                  <div>
-                    <Label htmlFor="foto">Foto Profil</Label>
-                    <div className="mt-1 flex justify-center px-3 py-3 border-2 border-gray-300 border-dashed rounded-md">
-                      <div className="space-y-1 text-center">
-                        <Upload className="mx-auto h-6 w-6 text-gray-400" />
-                        <div className="flex text-xs text-gray-600">
-                          <label
-                            htmlFor="foto"
-                            className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
-                          >
-                            <span>Upload file</span>
-                            <input
-                              id="foto"
-                              name="foto"
-                              type="file"
-                              className="sr-only"
-                              accept="image/*"
-                              onChange={(e) => handleFileChange('foto', e.target.files?.[0] || null)}
-                            />
-                          </label>
-                        </div>
-                        <p className="text-xs text-gray-500">PNG, JPG, JPEG</p>
-                      </div>
-                    </div>
-                    {fotoPreview && (
-                      <div className="mt-3 flex items-center gap-3">
-                        <img src={fotoPreview} alt="Preview foto" className="h-12 w-12 rounded-md object-cover border" />
-                        {files.foto && (
-                          <div className="flex items-center text-sm text-green-600">
-                            <CheckCircle className="h-4 w-4 mr-1" />
-                            {files.foto.name}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                  <FileUploadPreview
+                    id="foto"
+                    label="Foto Profil"
+                    previewUrl={previews.foto}
+                    fileName={files.foto?.name}
+                    onFileChange={handleFileChange}
+                    previewType="avatar"
+                  />
                 </div>
 
                 <Button
