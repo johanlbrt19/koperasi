@@ -3,37 +3,26 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import eventsImage from '@/assets/campus-events.jpg';
+import React, { useEffect, useState } from 'react';
+import { apiClient, EventItemApi } from '@/lib/api';
+import config from '@/config/env';
+import { useNavigate } from 'react-router-dom';
 
 const Events = () => {
-  const upcomingEvents = [
-    {
-      title: 'Leadership Workshop Series',
-      date: 'Oct 15, 2024',
-      time: '6:00 PM - 8:00 PM',
-      location: 'Student Union Building',
-      attendees: 45,
-      category: 'Workshop',
-      description: 'Develop essential leadership skills through interactive sessions and peer collaboration.'
-    },
-    {
-      title: 'Community Service Day',
-      date: 'Oct 22, 2024', 
-      time: '9:00 AM - 4:00 PM',
-      location: 'Local Community Center',
-      attendees: 80,
-      category: 'Service',
-      description: 'Join us for a day of giving back to our local community through various volunteer activities.'
-    },
-    {
-      title: 'Networking Night',
-      date: 'Nov 5, 2024',
-      time: '7:00 PM - 9:00 PM', 
-      location: 'Campus Conference Center',
-      attendees: 120,
-      category: 'Networking',
-      description: 'Connect with alumni, faculty, and fellow students in a professional networking environment.'
-    }
-  ];
+  const navigate = useNavigate();
+  const [upcomingEvents, setUpcomingEvents] = useState<EventItemApi[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await apiClient.listEvents();
+        setUpcomingEvents((res.data?.events || []).slice(0, 6));
+      } catch (e) {
+        // silent fail for landing
+      }
+    };
+    load();
+  }, []);
 
   const pastEvents = [
     'Annual Fundraising Gala - $15,000 raised',
@@ -64,8 +53,8 @@ const Events = () => {
               <div>
                 <h3 className="text-3xl md:text-4xl font-bold mb-4">Annual Student Summit 2024</h3>
                 <p className="text-xl mb-6 text-white/90">December 10-12 | University Convention Center</p>
-                <Button size="lg" className="bg-white text-primary hover:bg-white/90">
-                  Register Now
+                <Button size="lg" className="bg-white text-primary hover:bg-white/90" onClick={() => navigate('/login')}>
+                  RSVP Now
                   <ExternalLink className="ml-2 h-5 w-5" />
                 </Button>
               </div>
@@ -82,11 +71,11 @@ const Events = () => {
                 <CardHeader>
                   <div className="flex justify-between items-start mb-2">
                     <Badge variant="secondary" className="bg-primary/10 text-primary">
-                      {event.category}
+                      {event.category || 'Event'}
                     </Badge>
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Users className="h-4 w-4 mr-1" />
-                      {event.attendees}
+                      {event.attendeeCount || 0}
                     </div>
                   </div>
                   <CardTitle className="text-xl text-primary">{event.title}</CardTitle>
@@ -97,7 +86,7 @@ const Events = () => {
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center text-sm">
                       <Calendar className="h-4 w-4 mr-2 text-accent" />
-                      <span>{event.date} • {event.time}</span>
+                      <span>{new Date(event.date).toLocaleDateString('id-ID')} • {event.startTime && event.endTime ? `${event.startTime}-${event.endTime}` : (event.time || '')}</span>
                     </div>
                     <div className="flex items-center text-sm">
                       <MapPin className="h-4 w-4 mr-2 text-accent" />
@@ -105,8 +94,8 @@ const Events = () => {
                     </div>
                   </div>
 
-                  <Button className="w-full hero-gradient text-white border-0">
-                    RSVP Now
+                  <Button className="w-full hero-gradient text-white border-0" onClick={() => navigate('/login')}>
+                    Daftar Event
                   </Button>
                 </CardContent>
               </Card>
