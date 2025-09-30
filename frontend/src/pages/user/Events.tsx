@@ -1,57 +1,36 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar, Clock, MapPin, Users, Search, Filter } from 'lucide-react';
+import { apiClient, EventItemApi } from '@/lib/api';
+import config from '@/config/env';
+import { useToast } from '@/hooks/use-toast';
 
 const Events: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
 
-  // Mock data - replace with actual API calls
-  const events = [
-    {
-      id: '1',
-      title: 'Rapat Anggota Tahunan',
-      description: 'Rapat anggota tahunan untuk membahas laporan keuangan dan rencana kerja tahun depan',
-      date: '2024-03-15',
-      time: '09:00',
-      location: 'Aula Utama UIN SGD',
-      category: 'Rapat',
-      status: 'upcoming',
-      maxParticipants: 200,
-      currentParticipants: 150,
-      image: '/placeholder-event.jpg'
-    },
-    {
-      id: '2',
-      title: 'Pelatihan Kewirausahaan',
-      description: 'Pelatihan kewirausahaan untuk mengembangkan kemampuan bisnis anggota',
-      date: '2024-02-20',
-      time: '14:00',
-      location: 'Ruang Seminar FEB',
-      category: 'Pelatihan',
-      status: 'upcoming',
-      maxParticipants: 50,
-      currentParticipants: 35,
-      image: '/placeholder-event.jpg'
-    },
-    {
-      id: '3',
-      title: 'Bazar Produk Koperasi',
-      description: 'Pameran dan penjualan produk-produk hasil usaha koperasi',
-      date: '2024-01-25',
-      time: '08:00',
-      location: 'Lapangan Parkir Kampus',
-      category: 'Bazar',
-      status: 'completed',
-      maxParticipants: 100,
-      currentParticipants: 100,
-      image: '/placeholder-event.jpg'
-    }
-  ];
+  const { toast } = useToast();
+  const [events, setEvents] = useState<EventItemApi[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      try {
+        const res = await apiClient.listEvents();
+        setEvents(res.data?.events || []);
+      } catch (e: any) {
+        toast({ title: 'Gagal memuat event', description: e.message || 'Terjadi kesalahan', variant: 'destructive' });
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   const categories = [
     { value: 'all', label: 'Semua Kategori' },
@@ -75,16 +54,24 @@ const Events: React.FC = () => {
     }
   };
 
-  const filteredEvents = events.filter(event => {
-    const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         event.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = filterCategory === 'all' || event.category === filterCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const filteredEvents = useMemo(() => {
+    return events.filter(event => {
+      const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (event.description || '').toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = filterCategory === 'all' || event.category === filterCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [events, searchTerm, filterCategory]);
 
-  const handleRegister = (eventId: string) => {
-    console.log('Register for event:', eventId);
-    // Implement registration logic
+  const handleRegister = async (eventId: string) => {
+    try {
+      await apiClient.rsvpEvent(eventId);
+      toast({ title: 'Berhasil', description: 'Anda terdaftar pada event ini.' });
+      // Optimistic increment attendeeCount locally
+      setEvents(prev => prev.map(ev => ev._id === eventId ? { ...ev, attendeeCount: (ev.attendeeCount || 0) + 1 } : ev));
+    } catch (e: any) {
+      toast({ title: 'Gagal mendaftar', description: e.message || 'Terjadi kesalahan', variant: 'destructive' });
+    }
   };
 
   return (
@@ -132,10 +119,10 @@ const Events: React.FC = () => {
           {/* Events Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredEvents.map((event) => (
-              <Card key={event.id} className="overflow-hidden">
+              <Card key={event._id} className="overflow-hidden">
                 <div className="aspect-video bg-gray-200 relative">
                   <img
-                    src={event.image}
+                    src={event.poster ? `${config.assetsBaseUrl}/uploads/berkas/${event.poster}` : ''}
                     alt={event.title}
                     className="w-full h-full object-cover"
                     onError={(e) => {
@@ -143,7 +130,7 @@ const Events: React.FC = () => {
                     }}
                   />
                   <div className="absolute top-4 right-4">
-                    {getStatusBadge(event.status)}
+                    <Badge variant="secondary">{event.category || 'Event'}</Badge>
                   </div>
                 </div>
                 <CardHeader>
@@ -165,7 +152,7 @@ const Events: React.FC = () => {
                     </div>
                     <div className="flex items-center text-sm text-gray-600">
                       <Clock className="mr-2 h-4 w-4" />
-                      {event.time} WIB
+                      {event.startTime && event.endTime ? `${event.startTime} - ${event.endTime}` : (event.time || '-')}
                     </div>
                     <div className="flex items-center text-sm text-gray-600">
                       <MapPin className="mr-2 h-4 w-4" />
@@ -173,24 +160,17 @@ const Events: React.FC = () => {
                     </div>
                     <div className="flex items-center text-sm text-gray-600">
                       <Users className="mr-2 h-4 w-4" />
-                      {event.currentParticipants}/{event.maxParticipants} peserta
+                      {(event.attendeeCount || 0)} peserta
                     </div>
                   </div>
 
                   <div className="pt-4">
-                    {event.status === 'upcoming' ? (
-                      <Button 
-                        className="w-full" 
-                        onClick={() => handleRegister(event.id)}
-                        disabled={event.currentParticipants >= event.maxParticipants}
-                      >
-                        {event.currentParticipants >= event.maxParticipants ? 'Penuh' : 'Daftar'}
-                      </Button>
-                    ) : (
-                      <Button variant="outline" className="w-full" disabled>
-                        {event.status === 'completed' ? 'Selesai' : 'Tidak Tersedia'}
-                      </Button>
-                    )}
+                    <Button 
+                      className="w-full" 
+                      onClick={() => handleRegister(event._id)}
+                    >
+                      Daftar
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

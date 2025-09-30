@@ -190,6 +190,10 @@ class ApiClient {
     return this.request(`/psda/events/${id}`);
   }
 
+  async rsvpEvent(id: string): Promise<ApiResponse> {
+    return this.request(`/psda/events/${id}/rsvp`, { method: 'POST' });
+  }
+
   async createEvent(payload: {
     title: string;
     description?: string;

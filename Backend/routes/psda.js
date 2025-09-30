@@ -13,7 +13,48 @@ const {
 
 const router = express.Router();
 
-// Protect and authorize PSDA only
+// Public endpoints: list and get events (no auth)
+router.get('/events', async (req, res) => {
+  try {
+    const events = await Event.find().sort({ createdAt: -1 });
+    res.json({ success: true, data: { events } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+router.get('/events/:id', async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ success: false, message: 'Event tidak ditemukan' });
+    res.json({ success: true, data: { event } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Authenticated user endpoints (no role restriction)
+router.post('/events/:id/rsvp', protect, async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ success: false, message: 'Event tidak ditemukan' });
+
+    const already = event.attendance.find(a => String(a.user) === String(req.user._id));
+    if (already) {
+      return res.status(400).json({ success: false, message: 'Anda sudah terdaftar pada event ini' });
+    }
+
+    event.attendance.push({ user: req.user._id, nim: req.user.nim, nama: req.user.nama });
+    await event.save();
+
+    res.json({ success: true, message: 'Pendaftaran event berhasil' });
+  } catch (error) {
+    console.error('RSVP event error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Protect and authorize PSDA only for management endpoints
 router.use(protect);
 router.use(authorize('psda'));
 
@@ -48,26 +89,7 @@ router.post('/events', upload.single('poster'), async (req, res) => {
   }
 });
 
-// List events
-router.get('/events', async (req, res) => {
-  try {
-    const events = await Event.find().sort({ createdAt: -1 });
-    res.json({ success: true, data: { events } });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
-
-// Get single event
-router.get('/events/:id', async (req, res) => {
-  try {
-    const event = await Event.findById(req.params.id);
-    if (!event) return res.status(404).json({ success: false, message: 'Event tidak ditemukan' });
-    res.json({ success: true, data: { event } });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
+// (list/get moved to public section above)
 
 // Update event
 router.put('/events/:id', upload.single('poster'), async (req, res) => {
